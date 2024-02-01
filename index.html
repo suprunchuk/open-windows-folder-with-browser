@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Открыть папку</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }
+
+            button {
+                padding: 10px 20px;
+                font-size: 16px;
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+            input {
+                padding: 8px;
+                font-size: 16px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                margin-right: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <input type="text" id="folderPath" placeholder="Введите путь к папке" />
+        <button onclick="openFolder()">Открыть папку</button>
+        <script>
+            function openFolder() {
+                const folderPathInput = document.getElementById("folderPath");
+                const folderPath = folderPathInput.value.trim();
+                console.log(`Attempting to open folder: ${folderPath}`);
+                if (folderPath === "") {
+                    alert("Пожалуйста, введите путь к папке");
+                    return;
+                }
+
+                fetch(`http://localhost:3000/open-folder?path=${encodeURIComponent(folderPath)}`)
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Error opening folder");
+                        }
+                        console.log("Folder opened successfully");
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+            }
+        </script>
+    </body>
+</html>
