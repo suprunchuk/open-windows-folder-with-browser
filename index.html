@@ -44,6 +44,8 @@
         <input type="text" id="folderPath" placeholder="Введите путь к папке" />
         <button onclick="openFolder()">Открыть папку</button>
         <script>
+            const SERVER_ADDRESS = "http://localhost:3030";
+
             function openFolder() {
                 const folderPathInput = document.getElementById("folderPath");
                 const folderPath = folderPathInput.value.trim();
@@ -53,7 +55,7 @@
                     return;
                 }
 
-                fetch(`http://localhost:3000/open-folder?path=${encodeURIComponent(folderPath)}`)
+                fetch(`${SERVER_ADDRESS}/open-folder?path=${encodeURIComponent(folderPath)}`)
                     .then((response) => {
                         if (!response.ok) {
                             throw new Error("Error opening folder");
