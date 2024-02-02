@@ -5,13 +5,16 @@ const { exec } = require("child_process");
 const app = express();
 const PORT = 3030;
 
+// Function to open a folder in the file explorer
 function openFolderInExplorer(folderPath) {
     let command;
+
+    // Switch statement to determine the appropriate shell command based on the platform
     switch (process.platform) {
-        case "darwin":
+        case "darwin": // For macOS
             command = `open "${folderPath}"`;
             break;
-        case "win32":
+        case "win32": // For Windows
             command = `start explorer "${folderPath}"`;
             break;
         default:
@@ -19,6 +22,7 @@ function openFolderInExplorer(folderPath) {
             return;
     }
 
+    // Executing the shell command
     exec(command, { shell: true }, (error, stdout, stderr) => {
         if (error) {
             console.error(`exec error: ${error}`);
@@ -27,7 +31,7 @@ function openFolderInExplorer(folderPath) {
     });
 }
 
-//CORS
+// CORS middleware to enable Cross-Origin Resource Sharing
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
@@ -35,6 +39,7 @@ app.use((req, res, next) => {
     next();
 });
 
+// Endpoint to open a folder in the file explorer
 app.get("/open-folder", (req, res) => {
     const folderPath = req.query.path;
     if (!folderPath) {
@@ -54,6 +59,7 @@ app.get("/open-folder", (req, res) => {
     res.send("Папка открыта в проводнике");
 });
 
+// Starting the server
 app.listen(PORT, () => {
     console.log(`Сервер запущен на порту ${PORT}`);
 });
