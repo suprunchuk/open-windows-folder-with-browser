@@ -1,40 +1,40 @@
 const express = require("express");
 const path = require("path");
-const { exec } = require("child_process");
+const { execFile } = require("child_process");
 
 const app = express();
 const PORT = 3030;
 
 // Function to open a folder in the file explorer
 function openFolderInExplorer(folderPath) {
-    let command;
-
-    // Switch statement to determine the appropriate shell command based on the platform
-    switch (process.platform) {
-        case "darwin": // For macOS
-            command = `open "${folderPath}"`;
-            break;
-        case "win32": // For Windows
-            command = `start explorer "${folderPath}"`;
-            break;
-        default:
-            console.log("Unsupported platform");
-            return;
+    if (!isValidFolderPath(folderPath)) {
+        throw new Error("Недопустимый путь к папке");
     }
 
-    // Executing the shell command
-    exec(command, { shell: true }, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`exec error: ${error}`);
-            return;
-        }
-    });
+    const platform = process.platform;
+    const explorerCommand = platform === "win32" ? "explorer.exe" : "open";
+    const args = [folderPath];
+
+    try {
+        execFile(explorerCommand, args, { stdio: "ignore" });
+        return "Success";
+    } catch (error) {
+        console.error(`exec error: ${error}`);
+        throw new Error("Ошибка при открытии папки");
+    }
 }
 
-// CORS middleware to enable Cross-Origin Resource Sharing
+// Function to validate folder path
+function isValidFolderPath(folderPath) {
+    // Enhanced validation:
+    const allowedPaths = ["C:\\ESD", "/path/to/allowed/folder2"];
+    return typeof folderPath === "string" && path.isAbsolute(folderPath) && allowedPaths.includes(folderPath);
+}
+
+// CORS middleware with more restrictive configuration
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+    res.header("Access-Control-Allow-Methods", "GET");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
@@ -42,21 +42,19 @@ app.use((req, res, next) => {
 // Endpoint to open a folder in the file explorer
 app.get("/open-folder", (req, res) => {
     const folderPath = req.query.path;
-    if (!folderPath) {
-        res.status(400).send("Не указан путь к папке");
+
+    if (!isValidFolderPath(folderPath)) {
+        res.status(400).send("Недопустимый путь к папке");
         return;
     }
 
-    const result = openFolderInExplorer(folderPath);
-    if (result instanceof Error) {
+    try {
+        openFolderInExplorer(folderPath);
+        res.send("Папка открыта в проводнике");
+    } catch (error) {
+        console.error(error);
         res.status(500).send("Ошибка при открытии папки");
-        return;
-    } else if (result === "Unsupported platform") {
-        res.status(500).send("Платформа не поддерживается");
-        return;
     }
-
-    res.send("Папка открыта в проводнике");
 });
 
 // Starting the server
