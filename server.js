@@ -3,7 +3,7 @@ const path = require("path");
 const { exec } = require("child_process");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3030;
 
 // Открывает папку в проводнике через браузер
 function openFolderInExplorer(folderPath) {
@@ -28,6 +28,14 @@ function openFolderInExplorer(folderPath) {
             console.log("Unsupported platform");
     }
 }
+
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 
 // Маршрут для открытия папки
 app.get("/open-folder", (req, res) => {
